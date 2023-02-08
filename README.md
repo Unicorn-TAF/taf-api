@@ -1,4 +1,5 @@
-[![TafApiVersion](https://img.shields.io/static/v1?label=NuGet&message=1.0.0&color=blue&style=plastic)](https://www.nuget.org/packages/Unicorn.Taf.Api/)
+![Nuget](https://img.shields.io/nuget/v/Unicorn.Taf.Api?style=plastic)
+![Nuget](https://img.shields.io/nuget/dt/Unicorn.Taf.Api?style=plastic)
 
 Unicorn.Taf.Api
 =================================
