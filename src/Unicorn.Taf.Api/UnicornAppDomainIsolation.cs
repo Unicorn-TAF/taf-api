@@ -21,17 +21,31 @@ namespace Unicorn.Taf.Api
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnicornAppDomainIsolation{T}"/> class based on 
-        /// specified tests assembly directory.
+        /// specified base directory.
         /// </summary>
-        /// <param name="assemblyDirectory">path to tests assembly directory</param>
-        public UnicornAppDomainIsolation(string assemblyDirectory)
+        /// <param name="baseDirectory">path to tests assembly directory</param>
+        public UnicornAppDomainIsolation(string baseDirectory) : this(baseDirectory, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnicornAppDomainIsolation{T}"/> class based on 
+        /// specified base directory and AppDomain name.
+        /// </summary>
+        /// <param name="baseDirectory">path to tests assembly directory</param>
+        /// <param name="appDomainName">custom AppDomain name</param>
+        public UnicornAppDomainIsolation(string baseDirectory, string appDomainName)
         {
             Type type = typeof(T);
-            _appDirectory = Path.GetDirectoryName(type.Assembly.Location);
-            _assemblyDirectory = assemblyDirectory;
+            _assemblyDirectory = baseDirectory;
+            _appDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-            string appConfigFile = Path.Combine(assemblyDirectory, AppConfig);
-            AppDomainSetup domainSetup = new AppDomainSetup();
+            string appConfigFile = Path.Combine(baseDirectory, AppConfig);
+            AppDomainSetup domainSetup = new AppDomainSetup()
+            {
+                ApplicationBase = baseDirectory,
+                PrivateBinPath = AppDomain.CurrentDomain.SetupInformation.PrivateBinPath
+            };
 
             if (File.Exists(appConfigFile))
             {
@@ -39,7 +53,7 @@ namespace Unicorn.Taf.Api
             };
 
             _domain = AppDomain.CreateDomain(
-                "UnicornAppDomain:" + Guid.NewGuid(), 
+                string.IsNullOrEmpty(appDomainName) ? "UnicornAppDomain:" + Guid.NewGuid() : appDomainName, 
                 AppDomain.CurrentDomain.Evidence,
                 domainSetup);
 
@@ -77,7 +91,7 @@ namespace Unicorn.Taf.Api
                 Assembly assessment = Assembly.Load(bytes);
                 return assessment;
             }
-            
+
             return Assembly.GetExecutingAssembly().FullName == args.Name ? Assembly.GetExecutingAssembly() : null;
         }
 
@@ -98,7 +112,13 @@ namespace Unicorn.Taf.Api
                 return assemblyFile;
             }
 
-            return Path.Combine(_appDirectory, fileName);
+            assemblyFile = Path.Combine(_appDirectory, assemblyFile);
+            if (File.Exists(assemblyFile))
+            {
+                return assemblyFile;
+            }
+
+            return assemblyFile;
         }
     }
 }

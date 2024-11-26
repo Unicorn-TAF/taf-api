@@ -11,7 +11,7 @@ namespace Unicorn.Taf.Api
     /// <summary>
     /// Provides with ability to manipulate with Unicorn test assembly in dedicated <see cref="AssemblyLoadContext"/>
     /// </summary>
-    public class UnicornAssemblyLoadContext : AssemblyLoadContext
+    public sealed class UnicornAssemblyLoadContext : AssemblyLoadContext
     {
         private readonly string _assemblyDirectory;
         private readonly List<Assembly> _loadedAssemblies;
@@ -47,6 +47,8 @@ namespace Unicorn.Taf.Api
                     _loadedAssemblies.Add(LoadFromAssemblyPath(dll));
                 }
             }
+
+            Environment.CurrentDirectory = _assemblyDirectory;
 
             return this;
         }
